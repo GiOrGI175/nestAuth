@@ -23,6 +23,9 @@ export class User {
   @Prop({ type: String, enum: Subscription, default: Subscription.FREE })
   subscriptionPlan: string;
 
+  @Prop({ type: String, default: '' })
+  profilePicture: string;
+
   @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: 'Post', default: [] })
   posts: mongoose.Schema.Types.ObjectId[];
 }

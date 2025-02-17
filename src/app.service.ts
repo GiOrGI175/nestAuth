@@ -13,7 +13,26 @@ export class AppService {
     return this.s3Service.uploadFile(filePath, file);
   }
 
+  async uploadFiles(files) {
+    const fileIds = [];
+
+    for (let file of files) {
+      const path = Math.random().toString().slice(2);
+      const filePath = `images/${path}`;
+
+      const fileId = await this.s3Service.uploadFile(filePath, file);
+
+      fileIds.push(fileId);
+    }
+    return fileIds;
+
+    // return this.s3Service.uploadFile(filePath, file);
+  }
   getFile(fileId) {
     return this.s3Service.getFileById(fileId);
+  }
+
+  deleteFileById(fileId) {
+    return this.s3Service.deleteFileById(fileId);
   }
 }

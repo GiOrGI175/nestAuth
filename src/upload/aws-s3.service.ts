@@ -1,4 +1,5 @@
 import {
+  DeleteObjectCommand,
   GetObjectCommand,
   PutObjectCommand,
   S3Client,
@@ -65,5 +66,19 @@ export class AwsS3Service {
       console.error('Error retrieving file:', error);
       throw new Error('Failed to retrieve file');
     }
+  }
+
+  async deleteFileById(fileId) {
+    if (fileId) return;
+
+    const config = {
+      Bucket: this.bucketName,
+      Key: fileId,
+    };
+
+    const command = new DeleteObjectCommand(config);
+    await this.storageService.send(command);
+
+    return fileId;
   }
 }

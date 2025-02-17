@@ -9,12 +9,14 @@ import { User } from './schema/user.schema';
 import { isValidObjectId, Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Post } from 'src/posts/schema/post.schema';
+import { AwsS3Service } from 'src/upload/aws-s3.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
     @InjectModel(Post.name) private postModel: Model<Post>,
+    private awsS3Service: AwsS3Service,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -26,6 +28,25 @@ export class UsersService {
 
     const user = await this.userModel.create(createUserDto);
 
+    return user;
+  }
+
+  async uploadProfilePicture(id: string, file: Express.Multer.File) {
+    if (!isValidObjectId(id)) throw new BadRequestException('Invalid id');
+
+    const filePath = `users/${id}/profile-picture/`;
+    const fileUrl = await this.awsS3Service.uploadFile(filePath, file);
+
+    // აქ ესე გავაკეთე მარა ამხე urlს რო აბრუნებს ნორმალუია? დიდხანს უნდება თან ამის ჩასმაც ჭედავს D თუ არი რამე სხვა გზაც
+    const url = await this.awsS3Service.getFileById(filePath);
+
+    const user = await this.userModel.findByIdAndUpdate(
+      id,
+      { profilePicture: url },
+      { new: true },
+    );
+
+    if (!user) throw new BadRequestException('User not found');
     return user;
   }
 

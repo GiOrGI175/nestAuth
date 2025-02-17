@@ -8,6 +8,8 @@ import {
   Delete,
   UseGuards,
   Req,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -15,10 +17,20 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { isAuthGuard } from 'src/auth/auth.guard';
 import { Role } from './role.decorator';
 import { RoleGuard } from 'src/guards/role.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
+
+  @Post(':id/upload-profile-picture')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadProfilePicture(
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    return await this.usersService.uploadProfilePicture(id, file);
+  }
 
   @Get()
   findAll() {

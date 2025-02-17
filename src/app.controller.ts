@@ -4,10 +4,11 @@ import {
   Get,
   Post,
   UploadedFile,
+  UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
 import { AppService } from './app.service';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 
 @Controller()
 export class AppController {
@@ -29,8 +30,19 @@ export class AppController {
     return this.appService.uploadFile(filePath, file);
   }
 
+  @Post('upload-many')
+  @UseInterceptors(FilesInterceptor('file'))
+  uploadMany(@UploadedFiles() files: Express.Multer.File) {
+    return this.appService.uploadFiles(files);
+  }
+
   @Post('getFile')
   getFileById(@Body('fileId') fileId) {
     return this.appService.getFile(fileId);
+  }
+
+  @Post('deleteFile')
+  deleteFileById(@Body('fileId') fileId) {
+    return this.appService.deleteFileById(fileId);
   }
 }
