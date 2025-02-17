@@ -6,6 +6,7 @@ import { PostsModule } from './posts/posts.module';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
+import { AwsS3Module } from './upload/aws-s3.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { AuthModule } from './auth/auth.module';
     UsersModule,
     PostsModule,
     AuthModule,
+    AwsS3Module,
   ],
   controllers: [AppController],
   providers: [AppService],
