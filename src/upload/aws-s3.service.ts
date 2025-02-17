@@ -1,5 +1,10 @@
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import {
+  GetObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
 import { Injectable } from '@nestjs/common';
+import { Readable } from 'stream';
 
 @Injectable()
 export class AwsS3Service {
@@ -19,15 +24,46 @@ export class AwsS3Service {
   async uploadFile(filePath: string, file) {
     if (!filePath) return;
 
-    const config = {
-      Key: filePath,
-      Bucket: this.bucketName,
-      File: file,
-    };
+    try {
+      const config = {
+        Key: filePath,
+        Bucket: this.bucketName,
+        Body: file.buffer,
+      };
+      const uploadCommand = new PutObjectCommand(config);
+      await this.storageService.send(uploadCommand);
+      return filePath;
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      throw new Error('Failed to upload file');
+    }
+  }
 
-    const command = new PutObjectCommand(config);
-    await this.storageService.send(command);
+  async getFileById(filePath) {
+    if (!filePath) return;
 
-    return filePath;
+    try {
+      const config = {
+        Bucket: this.bucketName,
+        Key: filePath,
+      };
+
+      const command = new GetObjectCommand(config);
+      const fileStream = await this.storageService.send(command);
+
+      if (fileStream.Body instanceof Readable) {
+        const chunks = [];
+        for await (let chunk of fileStream.Body) {
+          chunks.push(chunk);
+        }
+        const fileBuffer = Buffer.concat(chunks);
+        const b64 = fileBuffer.toString('base64');
+        const file = `data:${fileStream.ContentType};base64,${b64}`;
+        return file;
+      }
+    } catch (error) {
+      console.error('Error retrieving file:', error);
+      throw new Error('Failed to retrieve file');
+    }
   }
 }

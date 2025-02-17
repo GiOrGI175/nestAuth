@@ -12,4 +12,8 @@ export class AppService {
   uploadFile(filePath, file) {
     return this.s3Service.uploadFile(filePath, file);
   }
+
+  getFile(fileId) {
+    return this.s3Service.getFileById(fileId);
+  }
 }

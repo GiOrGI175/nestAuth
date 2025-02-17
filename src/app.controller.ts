@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Get,
   Post,
@@ -23,8 +24,13 @@ export class AppController {
     const path = Math.random().toString().slice(2);
 
     const type = file.mimetype.split('/')[1];
-    const filePath = `images/${path}.${type}`;
+    const filePath = `images/${path}`;
 
-    console.log(filePath);
+    return this.appService.uploadFile(filePath, file);
+  }
+
+  @Post('getFile')
+  getFileById(@Body('fileId') fileId) {
+    return this.appService.getFile(fileId);
   }
 }
