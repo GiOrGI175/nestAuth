@@ -8,10 +8,14 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './schema/user.schema';
 import { isValidObjectId, Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
+import { Post } from 'src/posts/schema/post.schema';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
+  constructor(
+    @InjectModel(User.name) private userModel: Model<User>,
+    @InjectModel(Post.name) private postModel: Model<Post>,
+  ) {}
 
   async create(createUserDto: CreateUserDto) {
     const existUser = await this.userModel.findOne({
@@ -41,8 +45,14 @@ export class UsersService {
     return user;
   }
 
-  async update(tokenId: string, id: string, updateUserDto: UpdateUserDto) {
-    if (tokenId !== id) throw new UnauthorizedException('permition dined');
+  async update(
+    role: string,
+    tokenId: string,
+    id: string,
+    updateUserDto: UpdateUserDto,
+  ) {
+    if (tokenId !== id && role !== 'admin')
+      throw new UnauthorizedException('permition dined');
 
     if (!isValidObjectId(id)) throw new BadRequestException('ivalid id');
     const updatedUser = await this.userModel.findByIdAndUpdate(
@@ -62,6 +72,8 @@ export class UsersService {
     const deletedUser = await this.userModel.findByIdAndDelete(id);
 
     if (!deletedUser) throw new BadRequestException('user not found');
+
+    await this.postModel.deleteMany({ user: deletedUser._id });
 
     return deletedUser;
   }

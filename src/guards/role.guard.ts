@@ -8,7 +8,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
-export class isAuthGuard implements CanActivate {
+export class RoleGuard implements CanActivate {
   constructor(private JwtService: JwtService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -19,8 +19,7 @@ export class isAuthGuard implements CanActivate {
       if (!token) throw new BadRequestException('token is not provide');
 
       const payLoad = await this.JwtService.verify(token);
-      requset.userId = payLoad.userId;
-      requset.subscription = payLoad.subscription;
+      requset.role = payLoad.role;
 
       return true;
     } catch (e) {

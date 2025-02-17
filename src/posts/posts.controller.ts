@@ -14,6 +14,7 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 // import { HasUserId } from './guards/hasUserId.guard';
 import { isAuthGuard } from 'src/auth/auth.guard';
+import { Subscription } from 'src/users/subscription.decorator';
 
 @Controller('posts')
 @UseGuards(isAuthGuard)
@@ -21,10 +22,14 @@ export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
   @Post()
-  create(@Req() requset, @Body() createPostDto: CreatePostDto) {
+  create(
+    @Subscription() subscription,
+    @Req() requset,
+    @Body() createPostDto: CreatePostDto,
+  ) {
     const userId = requset.userId;
 
-    return this.postsService.create(userId, createPostDto);
+    return this.postsService.create(subscription, userId, createPostDto);
   }
 
   @Get()

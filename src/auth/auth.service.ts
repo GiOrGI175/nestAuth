@@ -41,6 +41,8 @@ export class AuthService {
 
     const payLoad = {
       userId: existUser._id,
+      role: existUser.role,
+      Subscription: existUser.subscriptionPlan,
     };
 
     const accesToken = await this.JwtService.sign(payLoad, { expiresIn: '1h' });

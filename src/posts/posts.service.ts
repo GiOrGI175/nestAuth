@@ -13,9 +13,19 @@ export class PostsService {
     @InjectModel('User') private userModel: Model<User>,
   ) {}
 
-  async create(userId, createPostDto: CreatePostDto) {
+  async create(subscription: string, userId, createPostDto: CreatePostDto) {
     const user = await this.userModel.findById(userId);
     if (!user) throw new BadRequestException('user not found');
+
+    const postCount = user.posts.length;
+    if (subscription === 'free' && postCount >= 10)
+      throw new BadRequestException('upgrade subscription plan');
+
+    if (subscription === 'basic' && postCount >= 100)
+      throw new BadRequestException('upgrade subscription plan');
+
+    if (subscription === 'permium' && postCount >= 300)
+      throw new BadRequestException('upgrade subscription plan');
 
     const newPost = await this.postModel.create({
       ...createPostDto,
