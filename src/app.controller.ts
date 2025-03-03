@@ -2,22 +2,28 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Post,
+  Query,
   UploadedFile,
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
 import { AppService } from './app.service';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { AwsS3Service } from './upload/aws-s3.service';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor(
+    private readonly appService: AppService,
+    private readonly awsS3Service: AwsS3Service,
+  ) {}
 
-  @Get()
-  getHello(): string {
-    return this.appService.getHello();
-  }
+  // @Get()
+  // getHello(): string {
+  //   return this.appService.getHello();
+  // }
 
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
@@ -39,6 +45,17 @@ export class AppController {
   @Post('getFile')
   getFileById(@Body('fileId') fileId) {
     return this.appService.getFile(fileId);
+  }
+
+  @Get('generate-signed-url/:id')
+  async generateSignedUrl(
+    @Param('id') filePath: string,
+    @Query('expiration') expiration: number = 60 * 5,
+  ) {
+    console.log(filePath, 'filePath');
+    console.log(expiration, 'expiration');
+
+    return this.appService.generateSignedUrl(filePath, expiration);
   }
 
   @Post('deleteFile')
